@@ -14,18 +14,5 @@ if (process.env.DATABASE_URL) {
       },
     },
   });
-} else {
-  // Fallback to individual env vars
-  sequelize = new Sequelize(
-    process.env.DB_NAME,
-    String(process.env.DB_USER),
-    String(process.env.DB_PASSWORD),
-    {
-      host: process.env.DB_HOST,
-      dialect: "postgres",
-      logging: false,
-    }
-  );
 }
-
 module.exports = sequelize;
