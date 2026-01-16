@@ -1,8 +1,8 @@
 const path = require('path');
 const express = require('express');
 const cloudinary = require('cloudinary');
-const app = require('./backend/app');
-const sequelize = require('./backend/config/database');
+const app = require('./app');
+const sequelize = require('./config/database');
 
 // Uncaught Exception
 process.on('uncaughtException', (err) => {
@@ -39,6 +39,11 @@ if (process.env.NODE_ENV === 'production') {
         res.send('Server is Running! 🚀');
     });
 }
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 
 // ❗ VERY IMPORTANT FOR VERCEL
 module.exports = app;
