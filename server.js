@@ -1,49 +1,35 @@
-const path = require('path');
-const express = require('express');
-const cloudinary = require('cloudinary');
-const app = require('./app');
-const sequelize = require('./config/database');
+const express = require("express");
+const cloudinary = require("cloudinary");
+const app = require("./app");
+const sequelize = require("./config/database");
 
 // Uncaught Exception
-process.on('uncaughtException', (err) => {
-    console.log(`Error: ${err.message}`);
-    process.exit(1);
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1);
 });
 
 // Cloudinary config
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// PostgreSQL connect (NO listen)
-sequelize.sync()
-    .then(() => {
-        console.log("PostgreSQL connected");
-    })
-    .catch((err) => {
-        console.log("DB connection failed:", err);
+const PORT = process.env.PORT || 10000;
+
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("PostgreSQL connected");
+
+    await sequelize.sync(); // optional
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
-
-// Deployment
-__dirname = path.resolve();
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '/frontend/build')));
-
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
-    });
-} else {
-    app.get('/', (req, res) => {
-        res.send('Server is Running! 🚀');
-    });
-}
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
-// ❗ VERY IMPORTANT FOR VERCEL
-module.exports = app;
+  } catch (err) {
+    console.error("Startup failed:", err);
+    process.exit(1);
+  }
+})();
